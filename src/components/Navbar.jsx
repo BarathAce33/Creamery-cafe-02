@@ -1,242 +1,187 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Calendar, MapPin, Sparkles, PhoneCall, Cpu, Award, Wand2, Menu as MenuIcon, X, Palette } from 'lucide-react';
-import { cafeInfo } from '../data/menuData';
+import { ShoppingBag, Calendar, MapPin, Sparkles, PhoneCall, Menu as MenuIcon, X, Instagram } from 'lucide-react';
 
-export default function Navbar({ cartCount, onOpenCart, onOpenDemo, onOpenStudio, onOpenLoyalty, activeSection, setActiveSection, currentTheme, setCurrentTheme }) {
+export default function Navbar({ cartCount, onOpenCart }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
-    };
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navLinks = [
-    { id: 'menu', label: 'Online Menu', icon: Sparkles },
-    { id: 'reservations', label: 'Book Table', icon: Calendar },
-    { id: 'location', label: 'Find Us', icon: MapPin },
-    { id: 'enquiry', label: 'Contact', icon: PhoneCall },
-  ];
-
-  const themes = [
-    { id: 'gold-emerald', name: 'Emerald & Gold (Classic)', icon: '🟢', badge: 'Active Brand' },
-    { id: 'oat-honey', name: 'Oat Milk & Honey Gold', icon: '🌾', badge: 'Warm Light Mode' },
-    { id: 'espresso-caramel', name: 'Espresso & Caramel', icon: '☕', badge: 'Midnight Cocoa' },
+    { id: 'story', label: 'Our Story' },
+    { id: 'menu', label: 'Menu' },
+    { id: 'gallery', label: 'Gallery' },
+    { id: 'reservations', label: 'Reserve' },
+    { id: 'location', label: 'Find Us' },
+    { id: 'enquiry', label: 'Contact' },
   ];
 
   const scrollTo = (id) => {
-    setActiveSection(id);
     setMobileMenuOpen(false);
     const elem = document.getElementById(id);
-    if (elem) {
-      elem.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (elem) elem.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-      scrolled 
-        ? 'theme-bg-main border-b theme-border py-3 shadow-lg' 
-        : 'theme-bg-main opacity-95 border-b theme-border py-4'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        
-        {/* Brand Logo & Name */}
-        <div 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex items-center gap-3 cursor-pointer group"
-        >
-          <div className="relative w-11 h-11 flex-shrink-0">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#F5BF42] to-[#10B981] rounded-full blur opacity-60 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-            <img 
-              src="/logo.jpg" 
-              alt="Creamery Cafe Logo" 
-              style={{ width: '100%', height: '100%', aspectRatio: '1 / 1', objectFit: 'cover' }}
-              className="relative w-full h-full aspect-square flex-shrink-0 rounded-full border-2 border-[#F5BF42] shadow-lg group-hover:scale-105 transition duration-300"
-            />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight theme-text-gold drop-shadow-sm">
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled
+            ? 'py-3 shadow-2xl'
+            : 'py-5'
+        }`}
+        style={{
+          background: scrolled
+            ? 'rgba(7, 19, 12, 0.92)'
+            : 'rgba(7, 19, 12, 0.4)',
+          backdropFilter: 'blur(20px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
+          borderBottom: scrolled ? '1px solid rgba(232,185,49,0.1)' : '1px solid transparent',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between">
+          {/* Brand Logo */}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-3 group"
+          >
+            <div className="relative w-10 h-10 flex-shrink-0">
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#E8B931] to-[#D4A428] rounded-full blur-sm opacity-40 group-hover:opacity-70 transition duration-500" />
+              <img
+                src="/logo.jpg"
+                alt="Creamery Café"
+                className="relative w-full h-full rounded-full border border-[#E8B931]/60 object-cover group-hover:scale-105 transition duration-300"
+              />
+            </div>
+            <div className="hidden sm:block">
+              <span className="font-cinzel text-lg font-bold tracking-wider text-gold-gradient block leading-tight">
                 CREAMERY
               </span>
-              <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase tracking-widest font-mono font-semibold theme-bg-sec theme-text-gold border theme-border rounded-full">
-                Peelamedu
+              <span className="text-[9px] tracking-[0.25em] uppercase font-medium block" style={{ color: 'var(--text-muted)' }}>
+                The Classic Café
               </span>
             </div>
-            <p className="text-[10px] theme-text-sub tracking-wider uppercase font-medium">
-              The Gold Standard in Milkshakes
-            </p>
-          </div>
-        </div>
+          </button>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1 theme-bg-sec border theme-border rounded-full px-4 py-1.5 backdrop-blur-md shadow-inner">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = activeSection === link.id;
-            return (
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
-                  isActive
-                    ? 'theme-btn-primary font-bold shadow-md'
-                    : 'theme-text-sub hover:theme-text-gold'
-                }`}
+                className="relative px-4 py-2 text-[13px] font-medium tracking-wide transition-colors duration-300 group"
+                style={{ color: 'var(--text-sub)' }}
               >
-                <Icon className="w-3.5 h-3.5" />
-                {link.label}
+                <span className="relative z-10 group-hover:text-[#E8B931] transition-colors duration-300">
+                  {link.label}
+                </span>
+                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#E8B931] group-hover:w-3/4 transition-all duration-300" />
               </button>
-            );
-          })}
-        </nav>
+            ))}
+          </nav>
 
-        {/* Action Buttons & Theme Switcher */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          
-          {/* Live Theme Toggle Selector Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full theme-bg-sec border theme-border text-xs font-mono font-bold theme-text-gold hover:opacity-90 transition shadow-md"
-              title="Switch Café Design Theme"
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            {/* Instagram */}
+            <a
+              href="https://www.instagram.com/creamery_cbe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full text-[12px] font-medium transition-all duration-300"
+              style={{ color: 'var(--text-sub)', border: '1px solid var(--border-subtle)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-gold)';
+                e.currentTarget.style.color = 'var(--text-gold)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                e.currentTarget.style.color = 'var(--text-sub)';
+              }}
             >
-              <Palette className="w-3.5 h-3.5 theme-text-gold animate-pulse" />
-              <span className="hidden sm:inline">Theme</span>
-              <span className="text-[10px] theme-btn-primary px-1.5 py-0.5 rounded-full font-extrabold">
-                {themes.find(t => t.id === currentTheme)?.icon || '🟢'}
-              </span>
+              <Instagram className="w-3.5 h-3.5" />
+              <span>@creamery_cbe</span>
+            </a>
+
+            {/* Cart Button */}
+            <button
+              onClick={onOpenCart}
+              className="relative flex items-center gap-2 px-4 py-2.5 rounded-full btn-gold text-[12px] font-bold tracking-wide"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span className="hidden sm:inline">Order</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#07130C] animate-scale-in">
+                  {cartCount}
+                </span>
+              )}
             </button>
 
-            {themeDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 theme-bg-sec border theme-border rounded-2xl p-2 shadow-2xl z-50 backdrop-blur-2xl animate-fadeIn">
-                <span className="text-[10px] font-mono theme-text-gold uppercase px-3 py-1 block font-bold">
-                  Select Theme Skin:
-                </span>
-                {themes.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => {
-                      setCurrentTheme(t.id);
-                      setThemeDropdownOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                      currentTheme === t.id
-                        ? 'theme-btn-primary font-bold shadow-md'
-                        : 'theme-text-sub hover:theme-bg-main hover:theme-text-gold'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>{t.icon}</span>
-                      <span>{t.name}</span>
-                    </div>
-                    <span className="text-[9px] font-mono opacity-80">{t.badge}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl transition-colors"
+              style={{ color: 'var(--text-gold)' }}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
+            </button>
           </div>
-
-          {/* Shake Studio Button */}
-          <button
-            onClick={onOpenStudio}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full theme-bg-sec border theme-border text-xs font-mono font-bold theme-text-gold hover:opacity-90 transition"
-            title="Open Build-Your-Own Shake Studio"
-          >
-            <Wand2 className="w-3.5 h-3.5 theme-text-gold" />
-            <span>Shake Studio</span>
-          </button>
-
-          {/* Gold Loyalty Rewards Button */}
-          <button
-            onClick={onOpenLoyalty}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full theme-bg-sec border theme-border text-xs font-mono font-bold theme-text-gold hover:opacity-90 transition"
-            title="View Creamery Gold Rewards"
-          >
-            <Award className="w-3.5 h-3.5 theme-text-gold" />
-            <span>340 Coins</span>
-          </button>
-
-          {/* Staff Portal Button */}
-          <button
-            onClick={onOpenDemo}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full theme-btn-primary text-xs font-mono font-bold hover:scale-105 transition-all shadow-md"
-            title="Open Staff & Kitchen Portal"
-          >
-            <Cpu className="w-3.5 h-3.5 animate-spin-slow" />
-            <span className="hidden sm:inline">Staff Portal</span>
-            <span className="sm:hidden">Staff</span>
-          </button>
-
-          {/* WhatsApp Cart Button */}
-          <button
-            onClick={onOpenCart}
-            className="relative flex items-center justify-center p-2 sm:px-3.5 sm:py-2 rounded-full theme-btn-primary font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span className="hidden md:inline ml-1.5">Cart</span>
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-[#EF4444] text-white font-mono text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-bounce shadow-md">
-                {cartCount}
-              </span>
-            )}
-          </button>
-
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl theme-bg-sec border theme-border theme-text-gold"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
-          </button>
         </div>
-      </div>
+      </header>
 
-      {/* Mobile Drawer Navigation */}
+      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="lg:hidden theme-bg-main border-b theme-border backdrop-blur-2xl px-4 pt-3 pb-6 space-y-3 mt-2 shadow-2xl animate-fadeIn">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            return (
+        <div
+          className="fixed inset-0 z-40 flex flex-col justify-center items-center animate-fade-in"
+          style={{ background: 'rgba(7, 19, 12, 0.97)', backdropFilter: 'blur(30px)' }}
+        >
+          <nav className="flex flex-col items-center gap-2">
+            {navLinks.map((link, i) => (
               <button
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold theme-text-main hover:theme-bg-sec hover:theme-text-gold border border-transparent hover:theme-border transition"
+                className="text-2xl font-serif font-light tracking-wider py-3 px-8 transition-colors duration-300 animate-fade-in-up"
+                style={{
+                  color: 'var(--text-sub)',
+                  animationDelay: `${i * 0.08}s`,
+                  animationFillMode: 'both',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-gold)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-sub)'}
               >
-                <Icon className="w-4 h-4 theme-text-gold" />
                 {link.label}
               </button>
-            );
-          })}
-          
-          <div className="pt-2 border-t theme-border space-y-2">
-            <span className="text-[10px] font-mono theme-text-gold uppercase block font-bold">Switch Theme Skin:</span>
-            <div className="grid grid-cols-3 gap-1.5">
-              {themes.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => {
-                    setCurrentTheme(t.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`py-2 px-1 rounded-xl text-[11px] font-bold text-center border transition ${
-                    currentTheme === t.id
-                      ? 'theme-btn-primary font-bold'
-                      : 'theme-bg-sec theme-text-sub theme-border'
-                  }`}
-                >
-                  {t.icon} {t.name.split(' ')[0]}
-                </button>
-              ))}
-            </div>
+            ))}
+          </nav>
+
+          {/* Mobile social links */}
+          <div className="mt-10 flex items-center gap-4">
+            <a
+              href="https://www.instagram.com/creamery_cbe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 rounded-full"
+              style={{ border: '1px solid var(--border-gold)', color: 'var(--text-gold)' }}
+            >
+              <Instagram className="w-5 h-5" />
+            </a>
+            <a
+              href="tel:+919842298765"
+              className="p-3 rounded-full"
+              style={{ border: '1px solid var(--border-gold)', color: 'var(--text-gold)' }}
+            >
+              <PhoneCall className="w-5 h-5" />
+            </a>
           </div>
+
+          <p className="mt-6 text-[11px] tracking-[0.3em] uppercase" style={{ color: 'var(--text-muted)' }}>
+            Peelamedu, Coimbatore
+          </p>
         </div>
       )}
-    </header>
+    </>
   );
 }

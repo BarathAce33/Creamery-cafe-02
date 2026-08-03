@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, Users, Sparkles, CheckCircle, QrCode, Share2, ShieldCheck, Heart } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Calendar as CalendarIcon, Clock, Users, QrCode, Share2, CheckCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { cafeInfo } from '../data/menuData';
 
@@ -12,141 +12,122 @@ export default function ReservationSection({ onTriggerReservationAutomation }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [specialNote, setSpecialNote] = useState('');
-
   const [confirmedPass, setConfirmedPass] = useState(null);
+  const [visible, setVisible] = useState(false);
+  const sectionRef = useRef(null);
 
-  const timeSlots = [
-    '12:30 PM', '01:40 PM', '04:00 PM', '06:00 PM', '07:30 PM', '09:00 PM', '10:15 PM'
-  ];
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const timeSlots = ['12:30 PM', '01:40 PM', '04:00 PM', '06:00 PM', '07:30 PM', '09:00 PM', '10:15 PM'];
 
   const seatingZones = [
-    { id: 'lounge', name: 'Emerald Lounge', tag: 'Indoor AC • Ambient Lighting', icon: '🛋️' },
-    { id: 'terrace', name: 'Garden Terrace', tag: 'Outdoor Breezy • Peelamedu View', icon: '🌿' },
-    { id: 'vip', name: 'Gold VIP Booth', tag: 'Private Soft Leather Seating', icon: '👑' },
+    { id: 'lounge', name: 'Emerald Lounge', tag: 'Indoor AC • Ambient Light', icon: '🛋️' },
+    { id: 'terrace', name: 'Garden Terrace', tag: 'Outdoor • Peelamedu View', icon: '🌿' },
+    { id: 'vip', name: 'Gold VIP Booth', tag: 'Private • Leather Seating', icon: '👑' },
   ];
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
     if (!name || !phone) {
-      alert('Please provide your name and phone number for the table reservation pass.');
+      alert('Please provide your name and phone number.');
       return;
     }
 
     const passData = {
       id: `CR-RES-${Math.floor(1000 + Math.random() * 9000)}`,
-      name,
-      phone,
+      name, phone,
       date: reservationDate,
       time: reservationTime,
       guests: guestsCount,
-      zone: seatingZones.find(z => z.id === seatingZone)?.name || 'Main Lounge',
-      occasion,
-      note: specialNote,
+      zone: seatingZones.find(z => z.id === seatingZone)?.name || 'Lounge',
+      occasion, note: specialNote,
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
     setConfirmedPass(passData);
-
-    confetti({
-      particleCount: 40,
-      spread: 60,
-      colors: ['#F5BF42', '#10B981', '#E5B239'],
-    });
-
-    if (onTriggerReservationAutomation) {
-      onTriggerReservationAutomation(passData);
-    }
+    confetti({ particleCount: 40, spread: 60, colors: ['#E8B931', '#F5D060', '#34D399'] });
+    if (onTriggerReservationAutomation) onTriggerReservationAutomation(passData);
   };
 
   const handleWhatsAppSharePass = () => {
     if (!confirmedPass) return;
-    const msg = `🎉 *CREAMERY CAFÉ TABLE RESERVATION PASS* 🎉\n` +
-      `Pass ID: *${confirmedPass.id}*\n` +
-      `Guest Name: *${confirmedPass.name}*\n` +
-      `Guests: *${confirmedPass.guests} Persons*\n` +
-      `Date & Time: *${confirmedPass.date} at ${confirmedPass.time}*\n` +
-      `Zone: *${confirmedPass.zone}*\n` +
-      `Location: Peelamedu, Coimbatore\n` +
-      `_Status: AUTO-CONFIRMED & RESERVED_`;
+    const msg = `🎉 *CREAMERY CAFÉ TABLE RESERVATION* 🎉\nPass: *${confirmedPass.id}*\nGuest: *${confirmedPass.name}*\nParty: *${confirmedPass.guests} Guests*\nDate: *${confirmedPass.date} at ${confirmedPass.time}*\nZone: *${confirmedPass.zone}*\nLocation: Peelamedu, Coimbatore\n_Status: CONFIRMED_`;
     window.open(`https://wa.me/${confirmedPass.phone.replace(/[^0-9]/g, '') || cafeInfo.whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (
-    <section id="reservations" className="py-20 relative theme-bg-main">
-      
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full theme-bg-sec border theme-border theme-text-gold font-mono text-xs font-semibold uppercase tracking-wider mb-4">
-            <CalendarIcon className="w-3.5 h-3.5" />
-            Instant Booking Engine
+    <section id="reservations" ref={sectionRef} className="relative py-24 sm:py-32 overflow-hidden">
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%)' }}
+      />
+      <div className="absolute top-0 left-0 right-0 section-divider" />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8">
+        {/* Header */}
+        <div className="text-center mb-14">
+          <span
+            className={`inline-flex items-center gap-2 text-[11px] tracking-[0.4em] uppercase font-medium mb-6 transition-all duration-700 ${
+              visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+            style={{ color: 'var(--text-muted)' }}
+          >
+            <span className="w-8 h-px" style={{ background: 'var(--text-gold)' }} />
+            Reservations
+            <span className="w-8 h-px" style={{ background: 'var(--text-gold)' }} />
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold font-serif theme-text-gold drop-shadow-md">
-            RESERVE A VIP TABLE AT PEELAMEDU
+
+          <h2 className={`font-serif text-3xl sm:text-5xl font-light leading-tight transition-all duration-700 delay-200 ${
+            visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <span style={{ color: 'var(--text-main)' }}>Reserve Your </span>
+            <em className="text-gold-gradient font-normal">Table</em>
           </h2>
-          <p className="mt-3 text-sm sm:text-base theme-text-sub">
-            Skip the waiting queue. Select your preferred seating zone, date & time to generate your instant digital reservation pass.
+          <p className="mt-4 text-sm" style={{ color: 'var(--text-muted)' }}>
+            Skip the queue. Get your instant digital VIP pass.
           </p>
         </div>
 
-        {/* Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Reservation Form */}
-          <div className="lg:col-span-7 glass-panel p-6 sm:p-8 rounded-2xl border theme-border">
-            <form onSubmit={handleBookingSubmit} className="space-y-6">
-              
-              {/* Date & Time Selector */}
+          {/* Form */}
+          <div className="lg:col-span-7 glass-gold rounded-2xl p-6 sm:p-8">
+            <form onSubmit={handleBookingSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-2">
-                    Select Date:
-                  </label>
-                  <input
-                    type="date"
-                    value={reservationDate}
-                    onChange={(e) => setReservationDate(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl theme-bg-input border theme-border text-sm theme-text-main font-mono focus:border-current focus:outline-none"
-                  />
+                  <label className="text-[11px] font-mono uppercase tracking-wider block mb-2" style={{ color: 'var(--text-gold)' }}>Date</label>
+                  <input type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} className="input-premium text-xs font-mono" />
                 </div>
-
                 <div>
-                  <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-2">
-                    Guest Count ({guestsCount} {guestsCount === 1 ? 'Guest' : 'Guests'}):
+                  <label className="text-[11px] font-mono uppercase tracking-wider block mb-2" style={{ color: 'var(--text-gold)' }}>
+                    Guests ({guestsCount})
                   </label>
-                  <div className="flex items-center gap-3 theme-bg-input p-2 rounded-xl border theme-border">
-                    <input
-                      type="range"
-                      min="1"
-                      max="12"
-                      value={guestsCount}
-                      onChange={(e) => setGuestsCount(parseInt(e.target.value))}
-                      className="w-full accent-current theme-text-gold"
-                    />
-                    <span className="font-mono text-sm font-bold theme-text-gold min-w-[28px] text-center">
-                      {guestsCount}
-                    </span>
+                  <div className="flex items-center gap-3 p-2 rounded-xl" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)' }}>
+                    <input type="range" min="1" max="12" value={guestsCount} onChange={(e) => setGuestsCount(parseInt(e.target.value))}
+                      className="w-full" style={{ accentColor: 'var(--text-gold)' }} />
+                    <span className="font-mono text-sm font-bold min-w-[28px] text-center" style={{ color: 'var(--text-gold)' }}>{guestsCount}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Time Slots Pills */}
               <div>
-                <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-2.5">
-                  Available Time Slot:
-                </label>
+                <label className="text-[11px] font-mono uppercase tracking-wider block mb-2" style={{ color: 'var(--text-gold)' }}>Time Slot</label>
                 <div className="flex flex-wrap gap-2">
                   {timeSlots.map((slot) => (
-                    <button
-                      key={slot}
-                      type="button"
-                      onClick={() => setReservationTime(slot)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition ${
-                        reservationTime === slot
-                          ? 'theme-btn-primary shadow-md font-bold'
-                          : 'theme-bg-input theme-text-sub border theme-border hover:theme-text-gold'
-                      }`}
+                    <button key={slot} type="button" onClick={() => setReservationTime(slot)}
+                      className="px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all"
+                      style={{
+                        background: reservationTime === slot ? 'var(--gold-gradient)' : 'var(--bg-primary)',
+                        color: reservationTime === slot ? 'var(--bg-primary)' : 'var(--text-sub)',
+                        border: reservationTime === slot ? 'none' : '1px solid var(--border-subtle)',
+                        fontWeight: reservationTime === slot ? 700 : 500,
+                      }}
                     >
                       {slot}
                     </button>
@@ -154,194 +135,122 @@ export default function ReservationSection({ onTriggerReservationAutomation }) {
                 </div>
               </div>
 
-              {/* Seating Zone Cards */}
               <div>
-                <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-2.5">
-                  Seating Ambiance:
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label className="text-[11px] font-mono uppercase tracking-wider block mb-2" style={{ color: 'var(--text-gold)' }}>Seating Zone</label>
+                <div className="grid grid-cols-3 gap-2">
                   {seatingZones.map((zone) => (
-                    <div
-                      key={zone.id}
-                      onClick={() => setSeatingZone(zone.id)}
-                      className={`p-3.5 rounded-xl border cursor-pointer transition ${
-                        seatingZone === zone.id
-                          ? 'theme-bg-sec border-current theme-text-gold font-bold shadow-md'
-                          : 'theme-bg-input border-transparent theme-text-sub hover:theme-border'
-                      }`}
+                    <div key={zone.id} onClick={() => setSeatingZone(zone.id)}
+                      className="p-3 rounded-xl cursor-pointer transition-all text-center"
+                      style={{
+                        background: seatingZone === zone.id ? 'rgba(232,185,49,0.08)' : 'var(--bg-primary)',
+                        border: `1px solid ${seatingZone === zone.id ? 'var(--border-gold-hover)' : 'var(--border-subtle)'}`,
+                      }}
                     >
                       <div className="text-xl mb-1">{zone.icon}</div>
-                      <h4 className="text-xs font-bold theme-text-main font-serif">{zone.name}</h4>
-                      <p className="text-[10px] theme-text-sub mt-0.5">{zone.tag}</p>
+                      <h4 className="text-[11px] font-semibold" style={{ color: seatingZone === zone.id ? 'var(--text-gold)' : 'var(--text-main)' }}>{zone.name}</h4>
+                      <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{zone.tag}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Guest Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-1">
-                    Your Full Name:
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Ramesh Kumar"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl theme-bg-input border theme-border text-xs theme-text-main focus:border-current focus:outline-none"
-                  />
+                  <label className="text-[11px] font-mono uppercase tracking-wider block mb-1" style={{ color: 'var(--text-gold)' }}>Your Name</label>
+                  <input type="text" required placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className="input-premium text-xs" />
                 </div>
-
                 <div>
-                  <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-1">
-                    Mobile Number (For Pass):
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="98765 43210"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl theme-bg-input border theme-border text-xs theme-text-main focus:border-current focus:outline-none"
-                  />
+                  <label className="text-[11px] font-mono uppercase tracking-wider block mb-1" style={{ color: 'var(--text-gold)' }}>Mobile</label>
+                  <input type="tel" required placeholder="98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-premium text-xs" />
                 </div>
               </div>
 
-              {/* Special Occasion & Notes */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-1">
-                    Occasion:
-                  </label>
-                  <select
-                    value={occasion}
-                    onChange={(e) => setOccasion(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl theme-bg-input border theme-border text-xs theme-text-main font-semibold"
-                  >
-                    <option value="Casual Dining">Casual Dining</option>
-                    <option value="Birthday Celebration">Birthday Party 🎉</option>
-                    <option value="Anniversary">Anniversary 💕</option>
-                    <option value="Business Meet">Business Meet 💼</option>
+                  <label className="text-[11px] font-mono uppercase tracking-wider block mb-1" style={{ color: 'var(--text-gold)' }}>Occasion</label>
+                  <select value={occasion} onChange={(e) => setOccasion(e.target.value)} className="input-premium text-xs">
+                    <option>Casual Dining</option>
+                    <option>Birthday Party 🎉</option>
+                    <option>Anniversary 💕</option>
+                    <option>Business Meet 💼</option>
                   </select>
                 </div>
-
                 <div>
-                  <label className="text-xs font-mono font-bold theme-text-gold uppercase tracking-wider block mb-1">
-                    Special Requests:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Quiet corner, high chair, cake setup..."
-                    value={specialNote}
-                    onChange={(e) => setSpecialNote(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl theme-bg-input border theme-border text-xs theme-text-main"
-                  />
+                  <label className="text-[11px] font-mono uppercase tracking-wider block mb-1" style={{ color: 'var(--text-gold)' }}>Special Requests</label>
+                  <input type="text" placeholder="Quiet corner, high chair..." value={specialNote} onChange={(e) => setSpecialNote(e.target.value)} className="input-premium text-xs" />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-4 rounded-xl theme-btn-primary font-extrabold text-sm sm:text-base shadow-lg transition hover:scale-[1.01]"
-              >
-                Generate Instant Digital VIP Pass
+              <button type="submit" className="w-full py-4 rounded-xl btn-gold text-sm font-bold tracking-wide">
+                Generate VIP Pass
               </button>
-
             </form>
           </div>
 
-          {/* Digital VIP Pass Render Box */}
-          <div className="lg:col-span-5 flex flex-col items-center">
+          {/* VIP Pass Preview */}
+          <div className="lg:col-span-5">
             {confirmedPass ? (
-              <div className="w-full glass-panel rounded-2xl border-2 theme-border p-6 shadow-2xl animate-fadeIn relative overflow-hidden theme-bg-sec">
-                
-                {/* Pass Header */}
-                <div className="flex items-center justify-between border-b theme-border pb-4 mb-4">
+              <div className="glass-gold rounded-2xl p-6 shadow-2xl animate-scale-in" style={{ border: '1px solid var(--border-gold-hover)' }}>
+                <div className="flex items-center justify-between border-b pb-4 mb-4" style={{ borderColor: 'var(--border-gold)' }}>
                   <div className="flex items-center gap-2">
-                    <img src="/logo.jpg" alt="Logo" className="w-9 h-9 rounded-full border border-[#F5BF42]" />
+                    <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full border border-[#E8B931]" />
                     <div>
-                      <h4 className="font-serif font-bold theme-text-gold text-sm">CREAMERY VIP PASS</h4>
-                      <p className="text-[10px] theme-text-sub font-mono font-bold">RESERVATION VERIFIED</p>
+                      <h4 className="font-cinzel text-sm font-bold" style={{ color: 'var(--text-gold)' }}>CREAMERY VIP PASS</h4>
+                      <p className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>CONFIRMED</p>
                     </div>
                   </div>
-                  <span className="font-mono text-xs theme-text-gold font-bold theme-bg-main px-2.5 py-1 rounded-full border theme-border">
+                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-primary)', color: 'var(--text-gold)', border: '1px solid var(--border-gold)' }}>
                     {confirmedPass.id}
                   </span>
                 </div>
 
-                {/* Pass Content Grid */}
-                <div className="space-y-3 text-xs">
-                  <div className="flex justify-between">
-                    <span className="theme-text-sub font-mono">Guest Name:</span>
-                    <span className="font-bold theme-text-main font-serif">{confirmedPass.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="theme-text-sub font-mono">Party Size:</span>
-                    <span className="font-mono font-bold theme-text-gold">{confirmedPass.guests} Persons</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="theme-text-sub font-mono">Date & Time:</span>
-                    <span className="font-mono font-bold theme-text-main">{confirmedPass.date} @ {confirmedPass.time}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="theme-text-sub font-mono">Reserved Zone:</span>
-                    <span className="font-bold theme-text-gold">{confirmedPass.zone}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="theme-text-sub font-mono">Location:</span>
-                    <span className="theme-text-main">Peelamedu, Coimbatore</span>
-                  </div>
+                <div className="space-y-2.5 text-xs">
+                  {[
+                    ['Guest', confirmedPass.name],
+                    ['Party', `${confirmedPass.guests} Guests`],
+                    ['Date & Time', `${confirmedPass.date} @ ${confirmedPass.time}`],
+                    ['Zone', confirmedPass.zone],
+                    ['Location', 'Peelamedu, Coimbatore'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex justify-between">
+                      <span className="font-mono" style={{ color: 'var(--text-muted)' }}>{label}</span>
+                      <span className="font-semibold" style={{ color: 'var(--text-main)' }}>{value}</span>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Mock QR Code */}
-                <div className="mt-6 p-4 rounded-xl theme-bg-main flex flex-col items-center justify-center space-y-2 border theme-border">
-                  <div className="w-32 h-32 bg-white p-2 rounded-xl flex items-center justify-center text-[#07130C]">
-                    <QrCode className="w-28 h-28 stroke-[1.5]" />
+                <div className="mt-6 p-4 rounded-xl flex flex-col items-center gap-2" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)' }}>
+                  <div className="w-28 h-28 bg-white p-2 rounded-xl flex items-center justify-center">
+                    <QrCode className="w-24 h-24 stroke-[1.5]" style={{ color: '#07130C' }} />
                   </div>
-                  <p className="text-[10px] font-mono theme-text-gold font-bold tracking-wider">
-                    SCAN AT RECEPTION FOR EXPRESS ENTRY
-                  </p>
+                  <p className="text-[9px] font-mono tracking-wider" style={{ color: 'var(--text-gold)' }}>SCAN AT RECEPTION</p>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={handleWhatsAppSharePass}
-                    className="flex-1 py-2.5 rounded-xl theme-btn-primary font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-lg"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    Send Pass to WhatsApp
+                  <button onClick={handleWhatsAppSharePass} className="flex-1 py-2.5 rounded-xl btn-gold text-xs font-bold flex items-center justify-center gap-1.5">
+                    <Share2 className="w-3.5 h-3.5" /> WhatsApp Pass
                   </button>
-
-                  <button
-                    onClick={() => setConfirmedPass(null)}
-                    className="px-4 py-2.5 rounded-xl theme-bg-main theme-text-sub hover:theme-text-gold font-bold text-xs border theme-border"
-                  >
-                    New Booking
+                  <button onClick={() => setConfirmedPass(null)} className="px-4 py-2.5 rounded-xl text-xs font-bold btn-outline">
+                    New
                   </button>
                 </div>
-
               </div>
             ) : (
-              /* Preview Mock Pass State */
-              <div className="w-full glass-panel rounded-2xl border theme-border p-8 text-center flex flex-col items-center justify-center space-y-4">
-                <div className="w-16 h-16 rounded-xl theme-bg-sec border theme-border flex items-center justify-center theme-text-gold">
-                  <QrCode className="w-8 h-8" />
+              <div className="glass-card rounded-2xl p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-gold)', color: 'var(--text-gold)' }}>
+                  <QrCode className="w-7 h-7" />
                 </div>
-                <h4 className="font-serif text-base font-bold theme-text-main">
-                  Instant VIP Pass Generation
-                </h4>
-                <p className="text-xs theme-text-sub max-w-xs leading-relaxed font-medium">
-                  Fill in your preferred dining time & guest count to generate your custom encrypted QR Pass for instant entry at Creamery Café Peelamedu.
+                <h4 className="font-serif text-base font-semibold" style={{ color: 'var(--text-main)' }}>VIP Pass Preview</h4>
+                <p className="text-xs mt-2 max-w-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  Fill in your details to generate an instant digital reservation pass with QR code for express entry.
                 </p>
               </div>
             )}
           </div>
-
         </div>
-
       </div>
+
+      <div className="absolute bottom-0 left-0 right-0 section-divider" />
     </section>
   );
 }

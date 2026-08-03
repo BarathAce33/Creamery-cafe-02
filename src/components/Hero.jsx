@@ -1,66 +1,108 @@
-import React, { useEffect, useRef } from 'react';
-import { Sparkles, ShoppingBag, Calendar, Star, ChevronDown, Flame, Zap, ShieldCheck, ArrowRight, Play } from 'lucide-react';
-import { cafeInfo } from '../data/menuData';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Float, Sparkles as DreiSparkles } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import * as THREE from 'three';
+import { ChevronDown, ArrowRight, Star, MapPin } from 'lucide-react';
 
-export default function Hero({ onOpenCart, onOpenDemo }) {
-  const canvasRef = useRef(null);
+/* ─── 3D Floating Gold Orbs Scene ─── */
+function GoldOrb({ position, scale = 1 }) {
+  const meshRef = useRef();
+  const speed = useMemo(() => 0.3 + Math.random() * 0.5, []);
+  const offset = useMemo(() => Math.random() * Math.PI * 2, []);
 
-  // Animated background particle canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * speed + offset) * 0.3;
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.1;
+      meshRef.current.rotation.z = state.clock.elapsedTime * 0.15;
+    }
+  });
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+  return (
+    <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.5}>
+      <mesh ref={meshRef} position={position} scale={scale}>
+        <icosahedronGeometry args={[0.12, 1]} />
+        <meshStandardMaterial
+          color="#E8B931"
+          emissive="#E8B931"
+          emissiveIntensity={0.6}
+          roughness={0.3}
+          metalness={0.8}
+        />
+      </mesh>
+    </Float>
+  );
+}
 
-    const particles = Array.from({ length: 40 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 2.5 + 0.5,
-      color: Math.random() > 0.5 ? '#F5BF42' : '#10B981',
-      alpha: Math.random() * 0.5 + 0.2,
-      speedX: (Math.random() - 0.5) * 0.4,
-      speedY: (Math.random() - 0.5) * 0.4,
+function HeroScene() {
+  const orbs = useMemo(() => {
+    return Array.from({ length: 18 }, (_, i) => ({
+      position: [
+        (Math.random() - 0.5) * 8,
+        (Math.random() - 0.5) * 5,
+        (Math.random() - 0.5) * 4 - 2,
+      ],
+      scale: 0.5 + Math.random() * 1.2,
     }));
+  }, []);
 
-    const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
+  return (
+    <>
+      <ambientLight intensity={0.15} />
+      <pointLight position={[0, 3, 5]} intensity={0.8} color="#E8B931" />
+      <pointLight position={[-3, -2, 3]} intensity={0.3} color="#34D399" />
 
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
+      {orbs.map((orb, i) => (
+        <GoldOrb key={i} position={orb.position} scale={orb.scale} />
+      ))}
 
-      particles.forEach((p) => {
-        p.x += p.speedX;
-        p.y += p.speedY;
+      <DreiSparkles
+        count={60}
+        scale={10}
+        size={2}
+        speed={0.4}
+        color="#E8B931"
+        opacity={0.5}
+      />
 
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
+      <EffectComposer>
+        <Bloom
+          luminanceThreshold={0.4}
+          luminanceSmoothing={0.9}
+          intensity={0.8}
+          radius={0.8}
+        />
+      </EffectComposer>
+    </>
+  );
+}
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = p.color;
-        ctx.fill();
+/* ─── Animated Text ─── */
+function AnimatedWord({ children, delay = 0 }) {
+  return (
+    <span
+      className="inline-block animate-fade-in-up"
+      style={{ animationDelay: `${delay}s`, animationFillMode: 'both' }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* ─── Hero Section ─── */
+export default function Hero() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouse = (e) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
       });
-
-      animationFrameId = requestAnimationFrame(render);
     };
-
-    render();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
-    };
+    window.addEventListener('mousemove', handleMouse, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMouse);
   }, []);
 
   const scrollToMenu = () => {
@@ -72,135 +114,125 @@ export default function Hero({ onOpenCart, onOpenDemo }) {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden theme-bg-main">
-      {/* Particle Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-40" />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* 3D Canvas Background */}
+      <div className="absolute inset-0 z-0">
+        <Canvas
+          camera={{ position: [0, 0, 6], fov: 50 }}
+          dpr={[1, 1.5]}
+          gl={{ antialias: true, alpha: true }}
+          style={{ background: 'transparent' }}
+        >
+          <HeroScene />
+        </Canvas>
+      </div>
 
-      {/* Futuristic Radial Glow Orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#10B981]/10 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
-      <div className="absolute bottom-10 right-10 w-[450px] h-[450px] bg-[#F5BF42]/10 rounded-full blur-[120px] pointer-events-none animate-pulse-glow" />
+      {/* Gradient Overlays */}
+      <div className="absolute inset-0 z-[1]" style={{ background: 'var(--hero-gradient)' }} />
+      <div
+        className="absolute bottom-0 left-0 right-0 h-40 z-[1]"
+        style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }}
+      />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        
-        {/* Top Floating Badge */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full theme-bg-sec border theme-border shadow-md mb-8 animate-float">
-          <div className="flex items-center gap-1.5 theme-text-gold font-mono text-xs font-semibold">
-            <Star className="w-3.5 h-3.5 fill-current text-current" />
-            <span>4.9 / 5.0 Rating</span>
+      {/* Parallax content layer */}
+      <div
+        className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 text-center pt-28 pb-20"
+        style={{
+          transform: `translate(${mousePos.x * -5}px, ${mousePos.y * -5}px)`,
+          transition: 'transform 0.3s ease-out',
+        }}
+      >
+        {/* Location Badge */}
+        <div
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 animate-fade-in-up"
+          style={{
+            background: 'rgba(13, 31, 20, 0.6)',
+            border: '1px solid var(--border-gold)',
+            animationDelay: '0.2s',
+            animationFillMode: 'both',
+          }}
+        >
+          <div className="flex items-center gap-1.5 text-[11px] font-mono font-semibold" style={{ color: 'var(--text-gold)' }}>
+            <Star className="w-3 h-3 fill-current" />
+            <span>4.9 Rating</span>
           </div>
-          <span className="opacity-30">•</span>
-          <span className="text-emerald-gradient font-mono text-xs font-semibold flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping"></span>
-            PEELAMEDU, COIMBATORE
-          </span>
+          <span className="gold-dot" />
+          <div className="flex items-center gap-1.5 text-[11px] font-mono font-medium" style={{ color: 'var(--text-sub)' }}>
+            <MapPin className="w-3 h-3" />
+            <span>Peelamedu, Coimbatore</span>
+          </div>
         </div>
 
-        {/* Main Hero Logo Emblem & Typography */}
-        <div className="relative mb-6">
-          <div className="relative flex items-center justify-center mx-auto w-32 h-32 sm:w-40 sm:h-40 group mb-6">
-            <div className="absolute -inset-4 bg-gradient-to-r from-[#F5BF42] via-[#10B981] to-[#F5BF42] rounded-full blur-xl opacity-50 group-hover:opacity-80 transition duration-700"></div>
-            <img 
-              src="/logo.jpg" 
-              alt="Creamery Cafe Classic Logo" 
-              style={{ width: '100%', height: '100%', aspectRatio: '1 / 1', objectFit: 'cover' }}
-              className="relative w-full h-full aspect-square flex-shrink-0 rounded-full border-4 border-[#F5BF42] shadow-xl transform transition hover:scale-105 duration-500"
+        {/* Logo Emblem */}
+        <div className="flex justify-center mb-8 animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
+          <div className="relative group">
+            <div
+              className="absolute -inset-4 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-700"
+              style={{ background: 'radial-gradient(circle, rgba(232,185,49,0.4), transparent)' }}
+            />
+            <img
+              src="/logo.jpg"
+              alt="Creamery Café Logo"
+              className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full border-2 border-[#E8B931]/50 shadow-2xl object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </div>
+        </div>
 
-          <h1 className="mt-6 text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight">
-            <span className="block font-serif theme-text-gold drop-shadow-md">
-              THE GOLD STANDARD
-            </span>
-            <span className="block text-2xl sm:text-4xl md:text-5xl mt-2 theme-text-main font-cinzel font-light tracking-wider">
-              IN MILKSHAKES & GOURMET CAFÉ
-            </span>
+        {/* Main Typography */}
+        <div className="animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
+          <h1 className="font-cinzel text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-wider leading-none">
+            <span className="gold-shimmer">THE GOLD</span>
+            <br />
+            <span className="gold-shimmer">STANDARD</span>
           </h1>
-
-          <p className="mt-6 max-w-3xl mx-auto text-base sm:text-lg md:text-xl theme-text-sub leading-relaxed font-normal">
-            Welcome to <strong className="theme-text-gold">Creamery Café</strong>. Indulge in Peelamedu’s finest artisanal Lotus Biscoff thickshakes, fresh fruit creams, charcoal burgers, steamed momos, and automated 1-click ordering.
+          <p className="mt-4 font-serif text-lg sm:text-2xl md:text-3xl italic font-light tracking-wide" style={{ color: 'var(--text-sub)' }}>
+            in Milkshakes & Gourmet Café
           </p>
         </div>
 
-        {/* Call To Action Buttons */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          
-          {/* Order Menu Button */}
+        {/* Description */}
+        <p
+          className="mt-6 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed font-light animate-fade-in-up"
+          style={{ color: 'var(--text-sub)', animationDelay: '0.8s', animationFillMode: 'both' }}
+        >
+          Welcome to <strong style={{ color: 'var(--text-gold)' }}>Creamery Café</strong> — Peelamedu's finest artisanal destination 
+          for Lotus Biscoff thickshakes, fresh fruit creams, charcoal burgers, and steamed momos. 
+          Handcrafted with passion, served with perfection.
+        </p>
+
+        {/* CTA Buttons */}
+        <div
+          className="mt-10 flex flex-wrap items-center justify-center gap-4 animate-fade-in-up"
+          style={{ animationDelay: '1s', animationFillMode: 'both' }}
+        >
           <button
             onClick={scrollToMenu}
-            className="group relative inline-flex items-center gap-3 px-7 py-4 rounded-2xl theme-btn-primary font-extrabold text-sm sm:text-base tracking-wide shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+            className="group flex items-center gap-3 px-8 py-4 rounded-full btn-gold text-sm font-bold tracking-wide"
           >
-            <Sparkles className="w-5 h-5 animate-spin-slow" />
-            <span>Explore Online Menu</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+            <span>Explore Menu</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          {/* Book Table Button */}
           <button
             onClick={scrollToReservation}
-            className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl theme-bg-sec theme-text-main border theme-border font-bold text-sm sm:text-base shadow-lg hover:scale-105 transition-all duration-300"
+            className="flex items-center gap-3 px-8 py-4 rounded-full btn-outline text-sm tracking-wide"
           >
-            <Calendar className="w-5 h-5 theme-text-gold" />
-            <span>Reserve Table</span>
+            <span>Reserve a Table</span>
           </button>
-
-          {/* Staff Portal Button */}
-          <button
-            onClick={onOpenDemo}
-            className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl theme-bg-sec theme-text-gold border theme-border font-mono font-bold text-sm sm:text-base hover:scale-105 transition-all duration-300"
-          >
-            <Play className="w-4 h-4 fill-current" />
-            <span>Staff Portal & KDS</span>
-          </button>
-
-        </div>
-
-        {/* Feature Grid Highlights */}
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
-          
-          <div className="glass-panel glass-panel-hover p-4 rounded-2xl border theme-border">
-            <div className="w-10 h-10 rounded-xl theme-bg-sec flex items-center justify-center theme-text-gold mb-3">
-              <Flame className="w-5 h-5" />
-            </div>
-            <h4 className="font-bold text-sm theme-text-main">Gold Standard Shakes</h4>
-            <p className="text-xs theme-text-sub mt-1">Lotus Biscoff, Nutella & Real Sitaphal Creams</p>
-          </div>
-
-          <div className="glass-panel glass-panel-hover p-4 rounded-2xl border theme-border">
-            <div className="w-10 h-10 rounded-xl theme-bg-sec flex items-center justify-center theme-text-gold mb-3">
-              <Zap className="w-5 h-5" />
-            </div>
-            <h4 className="font-bold text-sm theme-text-main">WhatsApp Ordering</h4>
-            <p className="text-xs theme-text-sub mt-1">Direct kitchen ticket & instant receipt generation</p>
-          </div>
-
-          <div className="glass-panel glass-panel-hover p-4 rounded-2xl border theme-border">
-            <div className="w-10 h-10 rounded-xl theme-bg-sec flex items-center justify-center theme-text-gold mb-3">
-              <Calendar className="w-5 h-5" />
-            </div>
-            <h4 className="font-bold text-sm theme-text-main">Smart Table Booking</h4>
-            <p className="text-xs theme-text-sub mt-1">Instant QR Reservation Pass for Peelamedu</p>
-          </div>
-
-          <div className="glass-panel glass-panel-hover p-4 rounded-2xl border theme-border">
-            <div className="w-10 h-10 rounded-xl theme-bg-sec flex items-center justify-center theme-text-gold mb-3">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <h4 className="font-bold text-sm theme-text-main">Custom Café Automation</h4>
-            <p className="text-xs theme-text-sub mt-1">Simulated real-time kitchen & customer workflows</p>
-          </div>
-
         </div>
 
         {/* Scroll Indicator */}
-        <div className="mt-12 flex justify-center">
-          <button 
-            onClick={scrollToMenu} 
-            className="theme-text-gold opacity-75 hover:opacity-100 transition animate-bounce p-2"
+        <div className="mt-16 flex justify-center animate-fade-in-up" style={{ animationDelay: '1.2s', animationFillMode: 'both' }}>
+          <button
+            onClick={scrollToMenu}
+            className="flex flex-col items-center gap-2 group"
           >
-            <ChevronDown className="w-6 h-6" />
+            <span className="text-[10px] tracking-[0.3em] uppercase font-medium" style={{ color: 'var(--text-muted)' }}>
+              Discover
+            </span>
+            <ChevronDown className="w-5 h-5 animate-bounce" style={{ color: 'var(--text-gold)' }} />
           </button>
         </div>
-
       </div>
     </section>
   );
