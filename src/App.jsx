@@ -15,6 +15,24 @@ import Footer from './components/Footer';
 export default function App() {
   const [loading, setLoading] = useState(true);
 
+  // Live Theme Switcher State: 'espresso-caramel' | 'gold-emerald'
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    try {
+      return localStorage.getItem('creamery_theme') || 'espresso-caramel';
+    } catch {
+      return 'espresso-caramel';
+    }
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    try {
+      localStorage.setItem('creamery_theme', currentTheme);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [currentTheme]);
+
   // Cart State with localStorage persistence
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -135,11 +153,13 @@ export default function App() {
         <Navbar
           cartCount={cartTotalCount}
           onOpenCart={() => setIsCartOpen(true)}
+          currentTheme={currentTheme}
+          setCurrentTheme={setCurrentTheme}
         />
 
         {/* Page Sections */}
         <main>
-          <Hero />
+          <Hero currentTheme={currentTheme} />
           <StorySection />
           <MenuSection onAddToCart={handleAddToCart} />
           <GallerySection />

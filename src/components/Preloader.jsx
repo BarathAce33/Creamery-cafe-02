@@ -43,13 +43,13 @@ export default function Preloader({ onComplete }) {
       className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-700 ${
         phase === 2 ? 'opacity-0' : 'opacity-100'
       }`}
-      style={{ backgroundColor: '#07130C' }}
+      style={{ backgroundColor: '#1A120B' }}
     >
       {/* Background ambient glow */}
       <div className="absolute inset-0 overflow-hidden">
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full animate-pulse-glow"
-          style={{ background: 'radial-gradient(circle, rgba(232,185,49,0.08) 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, rgba(212,146,58,0.12) 0%, transparent 70%)' }}
         />
       </div>
 
@@ -65,9 +65,9 @@ export default function Preloader({ onComplete }) {
           >
             <defs>
               <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#E8B931" />
-                <stop offset="50%" stopColor="#F5D060" />
-                <stop offset="100%" stopColor="#D4A428" />
+                <stop offset="0%" stopColor="#D4923A" />
+                <stop offset="50%" stopColor="#F5B862" />
+                <stop offset="100%" stopColor="#B87322" />
               </linearGradient>
             </defs>
             <circle
@@ -95,15 +95,15 @@ export default function Preloader({ onComplete }) {
               cy="88"
               r="84"
               fill="none"
-              stroke="rgba(232,185,49,0.15)"
+              stroke="rgba(212,146,58,0.18)"
               strokeWidth="0.5"
               strokeDasharray="80 400"
             />
           </svg>
 
           {/* Logo */}
-          <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-[#E8B931] shadow-lg"
-               style={{ boxShadow: '0 0 40px rgba(232,185,49,0.2)' }}>
+          <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-[#D4923A] shadow-lg"
+               style={{ boxShadow: '0 0 40px rgba(212,146,58,0.25)' }}>
             <img
               src="/logo.jpg"
               alt="Creamery Café"
@@ -131,7 +131,7 @@ export default function Preloader({ onComplete }) {
 
         {/* Progress Bar */}
         <div className="w-48 relative">
-          <div className="h-[2px] bg-[rgba(232,185,49,0.1)] rounded-full overflow-hidden">
+          <div className="h-[2px] bg-[rgba(212,146,58,0.15)] rounded-full overflow-hidden">
             <div
               className="h-full preloader-bar rounded-full transition-all duration-100 ease-out"
               style={{ width: `${progress}%` }}

@@ -52,7 +52,7 @@ export default function ReservationSection({ onTriggerReservationAutomation }) {
     };
 
     setConfirmedPass(passData);
-    confetti({ particleCount: 40, spread: 60, colors: ['#E8B931', '#F5D060', '#34D399'] });
+    confetti({ particleCount: 40, spread: 60, colors: ['#D4923A', '#F5B862', '#E28728'] });
     if (onTriggerReservationAutomation) onTriggerReservationAutomation(passData);
   };
 

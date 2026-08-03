@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Calendar, MapPin, Sparkles, PhoneCall, Menu as MenuIcon, X, Instagram } from 'lucide-react';
+import { ShoppingBag, Calendar, MapPin, Sparkles, PhoneCall, Menu as MenuIcon, X, Instagram, Palette } from 'lucide-react';
 
-export default function Navbar({ cartCount, onOpenCart }) {
+export default function Navbar({ cartCount, onOpenCart, currentTheme, setCurrentTheme }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -26,6 +26,11 @@ export default function Navbar({ cartCount, onOpenCart }) {
     if (elem) elem.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const toggleTheme = () => {
+    const nextTheme = currentTheme === 'espresso-caramel' ? 'gold-emerald' : 'espresso-caramel';
+    setCurrentTheme(nextTheme);
+  };
+
   return (
     <>
       <header
@@ -36,11 +41,11 @@ export default function Navbar({ cartCount, onOpenCart }) {
         }`}
         style={{
           background: scrolled
-            ? 'rgba(7, 19, 12, 0.92)'
-            : 'rgba(7, 19, 12, 0.4)',
+            ? 'var(--nav-bg-scroll)'
+            : 'var(--nav-bg-top)',
           backdropFilter: 'blur(20px) saturate(1.4)',
           WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
-          borderBottom: scrolled ? '1px solid rgba(232,185,49,0.1)' : '1px solid transparent',
+          borderBottom: scrolled ? '1px solid var(--border-gold)' : '1px solid transparent',
         }}
       >
         <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between">
@@ -50,11 +55,11 @@ export default function Navbar({ cartCount, onOpenCart }) {
             className="flex items-center gap-3 group"
           >
             <div className="relative w-10 h-10 flex-shrink-0">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#E8B931] to-[#D4A428] rounded-full blur-sm opacity-40 group-hover:opacity-70 transition duration-500" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#D4923A] to-[#F5B862] rounded-full blur-sm opacity-40 group-hover:opacity-70 transition duration-500" />
               <img
                 src="/logo.jpg"
                 alt="Creamery Café"
-                className="relative w-full h-full rounded-full border border-[#E8B931]/60 object-cover group-hover:scale-105 transition duration-300"
+                className="relative w-full h-full rounded-full border border-[#D4923A]/60 object-cover group-hover:scale-105 transition duration-300"
               />
             </div>
             <div className="hidden sm:block">
@@ -76,16 +81,33 @@ export default function Navbar({ cartCount, onOpenCart }) {
                 className="relative px-4 py-2 text-[13px] font-medium tracking-wide transition-colors duration-300 group"
                 style={{ color: 'var(--text-sub)' }}
               >
-                <span className="relative z-10 group-hover:text-[#E8B931] transition-colors duration-300">
+                <span className="relative z-10 group-hover:text-[#D4923A] transition-colors duration-300">
                   {link.label}
                 </span>
-                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#E8B931] group-hover:w-3/4 transition-all duration-300" />
+                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#D4923A] group-hover:w-3/4 transition-all duration-300" />
               </button>
             ))}
           </nav>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-mono font-medium transition-all duration-300"
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-gold)',
+                color: 'var(--text-gold)',
+              }}
+              title="Switch Café Theme"
+            >
+              <Palette className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                {currentTheme === 'espresso-caramel' ? '☕ Espresso' : '🌿 Emerald'}
+              </span>
+            </button>
+
             {/* Instagram */}
             <a
               href="https://www.instagram.com/creamery_cbe"
@@ -114,7 +136,7 @@ export default function Navbar({ cartCount, onOpenCart }) {
               <ShoppingBag className="w-4 h-4" />
               <span className="hidden sm:inline">Order</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#07130C] animate-scale-in">
+                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[var(--bg-primary)] animate-scale-in">
                   {cartCount}
                 </span>
               )}
@@ -136,7 +158,7 @@ export default function Navbar({ cartCount, onOpenCart }) {
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 z-40 flex flex-col justify-center items-center animate-fade-in"
-          style={{ background: 'rgba(7, 19, 12, 0.97)', backdropFilter: 'blur(30px)' }}
+          style={{ background: 'var(--bg-primary)', backdropFilter: 'blur(30px)' }}
         >
           <nav className="flex flex-col items-center gap-2">
             {navLinks.map((link, i) => (
@@ -157,8 +179,28 @@ export default function Navbar({ cartCount, onOpenCart }) {
             ))}
           </nav>
 
+          {/* Theme switcher pill in mobile menu */}
+          <div className="mt-6 flex items-center gap-2">
+            <button
+              onClick={() => setCurrentTheme('espresso-caramel')}
+              className={`px-4 py-2 rounded-full text-xs font-medium font-mono border transition ${
+                currentTheme === 'espresso-caramel' ? 'btn-gold font-bold' : 'glass-card'
+              }`}
+            >
+              ☕ Espresso & Caramel
+            </button>
+            <button
+              onClick={() => setCurrentTheme('gold-emerald')}
+              className={`px-4 py-2 rounded-full text-xs font-medium font-mono border transition ${
+                currentTheme === 'gold-emerald' ? 'btn-gold font-bold' : 'glass-card'
+              }`}
+            >
+              🌿 Emerald & Gold
+            </button>
+          </div>
+
           {/* Mobile social links */}
-          <div className="mt-10 flex items-center gap-4">
+          <div className="mt-8 flex items-center gap-4">
             <a
               href="https://www.instagram.com/creamery_cbe"
               target="_blank"

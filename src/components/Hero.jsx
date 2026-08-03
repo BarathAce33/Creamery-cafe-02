@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { ChevronDown, ArrowRight, Star, MapPin } from 'lucide-react';
 
 /* ─── 3D Floating Gold Orbs Scene ─── */
-function GoldOrb({ position, scale = 1 }) {
+function GoldOrb({ position, scale = 1, themeColor = '#D4923A' }) {
   const meshRef = useRef();
   const speed = useMemo(() => 0.3 + Math.random() * 0.5, []);
   const offset = useMemo(() => Math.random() * Math.PI * 2, []);
@@ -24,8 +24,8 @@ function GoldOrb({ position, scale = 1 }) {
       <mesh ref={meshRef} position={position} scale={scale}>
         <icosahedronGeometry args={[0.12, 1]} />
         <meshStandardMaterial
-          color="#E8B931"
-          emissive="#E8B931"
+          color={themeColor}
+          emissive={themeColor}
           emissiveIntensity={0.6}
           roughness={0.3}
           metalness={0.8}
@@ -35,7 +35,11 @@ function GoldOrb({ position, scale = 1 }) {
   );
 }
 
-function HeroScene() {
+function HeroScene({ currentTheme }) {
+  const isEmerald = currentTheme === 'gold-emerald';
+  const mainColor = isEmerald ? '#E8B931' : '#D4923A';
+  const secondaryColor = isEmerald ? '#34D399' : '#F5B862';
+
   const orbs = useMemo(() => {
     return Array.from({ length: 18 }, (_, i) => ({
       position: [
@@ -50,11 +54,11 @@ function HeroScene() {
   return (
     <>
       <ambientLight intensity={0.15} />
-      <pointLight position={[0, 3, 5]} intensity={0.8} color="#E8B931" />
-      <pointLight position={[-3, -2, 3]} intensity={0.3} color="#34D399" />
+      <pointLight position={[0, 3, 5]} intensity={0.8} color={mainColor} />
+      <pointLight position={[-3, -2, 3]} intensity={0.3} color={secondaryColor} />
 
       {orbs.map((orb, i) => (
-        <GoldOrb key={i} position={orb.position} scale={orb.scale} />
+        <GoldOrb key={i} position={orb.position} scale={orb.scale} themeColor={mainColor} />
       ))}
 
       <DreiSparkles
@@ -62,7 +66,7 @@ function HeroScene() {
         scale={10}
         size={2}
         speed={0.4}
-        color="#E8B931"
+        color={mainColor}
         opacity={0.5}
       />
 
@@ -78,20 +82,8 @@ function HeroScene() {
   );
 }
 
-/* ─── Animated Text ─── */
-function AnimatedWord({ children, delay = 0 }) {
-  return (
-    <span
-      className="inline-block animate-fade-in-up"
-      style={{ animationDelay: `${delay}s`, animationFillMode: 'both' }}
-    >
-      {children}
-    </span>
-  );
-}
-
 /* ─── Hero Section ─── */
-export default function Hero() {
+export default function Hero({ currentTheme }) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -123,7 +115,7 @@ export default function Hero() {
           gl={{ antialias: true, alpha: true }}
           style={{ background: 'transparent' }}
         >
-          <HeroScene />
+          <HeroScene currentTheme={currentTheme} />
         </Canvas>
       </div>
 
@@ -146,7 +138,7 @@ export default function Hero() {
         <div
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 animate-fade-in-up"
           style={{
-            background: 'rgba(13, 31, 20, 0.6)',
+            background: 'var(--bg-card)',
             border: '1px solid var(--border-gold)',
             animationDelay: '0.2s',
             animationFillMode: 'both',
@@ -168,12 +160,12 @@ export default function Hero() {
           <div className="relative group">
             <div
               className="absolute -inset-4 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-700"
-              style={{ background: 'radial-gradient(circle, rgba(232,185,49,0.4), transparent)' }}
+              style={{ background: 'radial-gradient(circle, var(--border-gold-hover), transparent)' }}
             />
             <img
               src="/logo.jpg"
               alt="Creamery Café Logo"
-              className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full border-2 border-[#E8B931]/50 shadow-2xl object-cover group-hover:scale-105 transition-transform duration-500"
+              className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full border-2 border-[var(--text-gold)]/50 shadow-2xl object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </div>
         </div>

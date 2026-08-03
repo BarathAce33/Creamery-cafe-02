@@ -200,7 +200,7 @@ export default function MenuSection({ onAddToCart }) {
       particleCount: 30,
       spread: 50,
       origin: { y: 0.7 },
-      colors: ['#E8B931', '#F5D060', '#34D399'],
+      colors: ['#D4923A', '#F5B862', '#E28728'],
     });
     setCustomizingItem(null);
   };

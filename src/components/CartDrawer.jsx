@@ -31,7 +31,7 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantit
     msg += `📍 Creamery Café, Peelamedu\n`;
     msg += `_Sent via creamery-cbe.com_`;
 
-    confetti({ particleCount: 25, spread: 40, colors: ['#E8B931', '#F5D060', '#34D399'] });
+    confetti({ particleCount: 25, spread: 40, colors: ['#D4923A', '#F5B862', '#E28728'] });
 
     window.open(
       `https://wa.me/${cafeInfo.whatsappNumber}?text=${encodeURIComponent(msg)}`,
@@ -45,7 +45,7 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantit
       {isOpen && (
         <div
           className="fixed inset-0 z-[55] animate-fade-in"
-          style={{ background: 'rgba(7,19,12,0.7)', backdropFilter: 'blur(8px)' }}
+          style={{ background: 'rgba(26,18,11,0.75)', backdropFilter: 'blur(8px)' }}
           onClick={onClose}
         />
       )}

@@ -35,7 +35,7 @@ export default function EnquirySection() {
       return;
     }
     setSubmitted(true);
-    confetti({ particleCount: 30, spread: 50, colors: ['#E8B931', '#F5D060', '#34D399'] });
+    confetti({ particleCount: 30, spread: 50, colors: ['#D4923A', '#F5B862', '#E28728'] });
   };
 
   return (
